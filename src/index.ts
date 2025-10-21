@@ -292,6 +292,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
           }
         }
         
+        // Parse output if it's a stringified JSON
+        let output = args.output;
+        if (output && typeof output === "string" && output.trim().startsWith("{")) {
+          try {
+            output = JSON.parse(output);
+          } catch {
+            // Not JSON, use as-is
+          }
+        }
+        
         const result = await processor.queryExtended(
           input,
           args.operation as any,
@@ -299,7 +309,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
           args.content as string | undefined,
           args.position as any,
           args.index as number | undefined,
-          args.output as any
+          output as any
         );
         
         // Type guard for OutputResult
@@ -368,10 +378,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
           }
         }
         
+        // Parse output if it's a stringified JSON
+        let output = args.output;
+        if (output && typeof output === "string" && output.trim().startsWith("{")) {
+          try {
+            output = JSON.parse(output);
+          } catch {
+            // Not JSON, use as-is
+          }
+        }
+        
         const result = await processor.transformExtended(
           input,
           args.transforms as any[],
-          args.output as any
+          output as any
         );
         
         // Type guard for OutputResult

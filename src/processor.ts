@@ -155,12 +155,31 @@ export class MDProcessor {
         return result;
       }
 
-      // For select operation, return as-is (no output spec applies)
+      // Handle output (including for select operation if output is specified)
+      if (output) {
+        // For select, save the original tree, not the selected nodes
+        const tree = this.parse(markdown);
+        const metadata = {
+          ...sourceMeta,
+          operations: [
+            ...(sourceMeta.operations || []),
+            {
+              timestamp: new Date().toISOString(),
+              tool: "mdast-query",
+              operation,
+              selector,
+            },
+          ],
+        };
+        return this.outputHandler.handle(markdown, tree, output, metadata);
+      }
+      
+      // For select operation without output spec, return as-is
       if (operation === "select") {
         return result;
       }
 
-      // Handle output
+      // Handle output for non-select operations
       const tree = this.parse(result.result!);
       const metadata = {
         ...sourceMeta,
