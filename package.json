@@ -7,21 +7,42 @@
   "bin": {
     "mcp-mdast": "./dist/index.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "prepare": "npm run build",
-    "inspector": "npx @modelcontextprotocol/inspector dist/index.js"
+    "inspector": "npx @modelcontextprotocol/inspector dist/index.js",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "mcp",
     "mdast",
     "markdown",
     "remark",
-    "unified"
+    "unified",
+    "ast",
+    "manipulation",
+    "css-selector",
+    "model-context-protocol"
   ],
-  "author": "",
+  "author": "mako10k",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mako10k/mcp-mdast.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mako10k/mcp-mdast/issues"
+  },
+  "homepage": "https://github.com/mako10k/mcp-mdast#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
     "remark": "^15.0.1",

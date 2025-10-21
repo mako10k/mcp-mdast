@@ -8,6 +8,8 @@ DOMのようなマニピュレーションAPIと、CSS風セレクタによる�
 - 🎯 **CSS風セレクタ**: `heading[depth="1"]`、`paragraph > strong`のような直感的な選択
 - 🔧 **統合操作**: select、insert、update、remove、replaceを1つのツールで
 - 📊 **分析機能**: 文書構造、統計、目次生成など
+- 💾 **柔軟なI/O**: ファイル、URL、MDASTリソースからの入出力に対応
+- 🔄 **リソース管理**: MDASTツリーをリソースとして保存・再利用可能
 - ⚡ **高性能**: unified/remarkエコシステムによる高速処理
 - 🎨 **柔軟な変換**: カスタム変換ロジックの適用
 
@@ -53,6 +55,17 @@ npm run inspector
 
 Markdownを解析し、CSS風セレクタでクエリ・操作を行う統合ツール。
 
+**入力オプション:**
+- インラインMarkdown: `markdown: "# Title"`
+- ファイル: `markdown: {"source": "file", "path": "/path/to/file.md"}`
+- URL: `markdown: {"source": "url", "url": "https://example.com/doc.md"}`
+- MDASTリソース: `markdown: {"source": "mdast", "uri": "mdast://..."}`
+
+**出力オプション:**
+- テキスト（デフォルト）: `output: {"type": "text"}`
+- ファイル: `output: {"type": "file", "path": "/path/to/output.md"}`
+- MDASTリソース: `output: {"type": "mdast", "ttl": 3600}`
+
 **操作例:**
 
 ```typescript
@@ -92,7 +105,25 @@ Markdownを解析し、CSS風セレクタでクエリ・操作を行う統合ツ
 
 カスタム変換ロジックを適用。
 
+**変換タイプ:**
+- `wrap`: ノードをラッパーで囲む
+- `unwrap`: ラッパーを削除
+- `rename`: ノードタイプを変更（headingのdepth変更にも対応）
+- `clone`: ノードを複製
+
 ```typescript
+// 見出しレベルの変更
+{
+  markdown: "## Level 2",
+  transforms: [{
+    type: "rename",
+    selector: "heading[depth=\"2\"]",
+    newType: "heading",
+    depth: 3
+  }]
+}
+
+// ノードをblockquoteで囲む
 {
   markdown: "# Title\n\nParagraph",
   transforms: [{
