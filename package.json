@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "mcp-mdast": "./dist/index.js"
+    "mcp-mdast": "dist/index.js"
   },
   "files": [
     "dist",
@@ -34,7 +34,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mako10k/mcp-mdast.git"
+    "url": "git+https://github.com/mako10k/mcp-mdast.git"
   },
   "bugs": {
     "url": "https://github.com/mako10k/mcp-mdast/issues"
