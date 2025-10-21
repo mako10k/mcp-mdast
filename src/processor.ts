@@ -250,19 +250,24 @@ export class MDProcessor {
       if (typeof input === "string") {
         markdown = input;
         sourceMeta = { source: { type: "text" } };
+      } else if (input.source === "mdast") {
+        // Special handling for MDAST resources
+        const resource = await this.inputResolver.getResourceMetadata(input);
+        if (resource) {
+          // Convert to markdown
+          markdown = this.stringify(resource.mdast);
+          sourceMeta = {
+            source: { type: "mdast", value: input.uri },
+            operations: resource.metadata.operations || [],
+          };
+        } else {
+          throw new Error(`Resource not found: ${input.uri}`);
+        }
       } else {
         markdown = await this.inputResolver.resolve(input);
         const sourceType = input.source;
-        const sourceValue = input.path || input.url || input.uri;
+        const sourceValue = input.path || input.url || input.value;
         sourceMeta = { source: { type: sourceType, value: sourceValue } };
-
-        // Get resource metadata if mdast source
-        if (input.source === "mdast") {
-          const resource = await this.inputResolver.getResourceMetadata(input);
-          if (resource) {
-            sourceMeta.operations = resource.metadata.operations || [];
-          }
-        }
       }
 
       // Execute transforms
