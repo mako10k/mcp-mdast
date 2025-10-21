@@ -41,36 +41,37 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           type: "object",
           properties: {
             markdown: {
-              type: "string",
-              description: "操作対象のMarkdownテキスト（後方互換性）",
-            },
-            input: {
-              type: "object",
-              description: "柔軟な入力指定",
-              properties: {
-                source: {
-                  type: "string",
-                  enum: ["text", "file", "url", "mdast"],
-                  description: "入力ソースタイプ",
+              oneOf: [
+                { type: "string", description: "Markdownテキスト（後方互換性）" },
+                {
+                  type: "object",
+                  description: "柔軟な入力指定",
+                  properties: {
+                    source: {
+                      type: "string",
+                      enum: ["text", "file", "url", "mdast"],
+                      description: "入力ソースタイプ",
+                    },
+                    value: {
+                      type: "string",
+                      description: "text: Markdown文字列",
+                    },
+                    path: {
+                      type: "string",
+                      description: "file: ファイルパス（ホームディレクトリ内）",
+                    },
+                    url: {
+                      type: "string",
+                      description: "url: HTTP(S) URL",
+                    },
+                    uri: {
+                      type: "string",
+                      description: "mdast: リソースURI (mdast://...)",
+                    },
+                  },
+                  required: ["source"],
                 },
-                value: {
-                  type: "string",
-                  description: "text: Markdown文字列",
-                },
-                path: {
-                  type: "string",
-                  description: "file: ファイルパス（ホームディレクトリ内）",
-                },
-                url: {
-                  type: "string",
-                  description: "url: HTTP(S) URL",
-                },
-                uri: {
-                  type: "string",
-                  description: "mdast: リソースURI (mdast://...)",
-                },
-              },
-              required: ["source"],
+              ],
             },
             operation: {
               type: "string",
@@ -116,7 +117,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               required: ["type"],
             },
           },
-          required: ["operation"],
+          required: ["operation"]
         },
       },
       {
@@ -127,36 +128,37 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           type: "object",
           properties: {
             markdown: {
-              type: "string",
-              description: "変換対象のMarkdownテキスト（後方互換性）",
-            },
-            input: {
-              type: "object",
-              description: "柔軟な入力指定",
-              properties: {
-                source: {
-                  type: "string",
-                  enum: ["text", "file", "url", "mdast"],
-                  description: "入力ソースタイプ",
+              oneOf: [
+                { type: "string", description: "Markdownテキスト（後方互換性）" },
+                {
+                  type: "object",
+                  description: "柔軟な入力指定",
+                  properties: {
+                    source: {
+                      type: "string",
+                      enum: ["text", "file", "url", "mdast"],
+                      description: "入力ソースタイプ",
+                    },
+                    value: {
+                      type: "string",
+                      description: "text: Markdown文字列",
+                    },
+                    path: {
+                      type: "string",
+                      description: "file: ファイルパス",
+                    },
+                    url: {
+                      type: "string",
+                      description: "url: HTTP(S) URL",
+                    },
+                    uri: {
+                      type: "string",
+                      description: "mdast: リソースURI",
+                    },
+                  },
+                  required: ["source"],
                 },
-                value: {
-                  type: "string",
-                  description: "text: Markdown文字列",
-                },
-                path: {
-                  type: "string",
-                  description: "file: ファイルパス",
-                },
-                url: {
-                  type: "string",
-                  description: "url: HTTP(S) URL",
-                },
-                uri: {
-                  type: "string",
-                  description: "mdast: リソースURI",
-                },
-              },
-              required: ["source"],
+              ],
             },
             transforms: {
               type: "array",
@@ -210,7 +212,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               required: ["type"],
             },
           },
-          required: ["transforms"],
+          required: ["transforms"]
         },
       },
       {
@@ -221,36 +223,37 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           type: "object",
           properties: {
             markdown: {
-              type: "string",
-              description: "分析対象のMarkdownテキスト（後方互換性）",
-            },
-            input: {
-              type: "object",
-              description: "柔軟な入力指定",
-              properties: {
-                source: {
-                  type: "string",
-                  enum: ["text", "file", "url", "mdast"],
-                  description: "入力ソースタイプ",
+              oneOf: [
+                { type: "string", description: "Markdownテキスト（後方互換性）" },
+                {
+                  type: "object",
+                  description: "柔軟な入力指定",
+                  properties: {
+                    source: {
+                      type: "string",
+                      enum: ["text", "file", "url", "mdast"],
+                      description: "入力ソースタイプ",
+                    },
+                    value: {
+                      type: "string",
+                      description: "text: Markdown文字列",
+                    },
+                    path: {
+                      type: "string",
+                      description: "file: ファイルパス",
+                    },
+                    url: {
+                      type: "string",
+                      description: "url: HTTP(S) URL",
+                    },
+                    uri: {
+                      type: "string",
+                      description: "mdast: リソースURI",
+                    },
+                  },
+                  required: ["source"],
                 },
-                value: {
-                  type: "string",
-                  description: "text: Markdown文字列",
-                },
-                path: {
-                  type: "string",
-                  description: "file: ファイルパス",
-                },
-                url: {
-                  type: "string",
-                  description: "url: HTTP(S) URL",
-                },
-                uri: {
-                  type: "string",
-                  description: "mdast: リソースURI",
-                },
-              },
-              required: ["source"],
+              ],
             },
             analysis: {
               type: "array",
@@ -260,8 +263,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 enum: ["structure", "stats", "links", "headings", "toc"],
               },
             },
-          },
-          required: ["analysis"],
+          }
         },
       },
     ],
@@ -275,8 +277,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
 
     switch (name) {
       case "mdast-query": {
-        // Determine input (backward compatible)
-        const input = args.input || args.markdown;
+        // Determine input: markdown can be string or object (InputSpec)
+        let input = args.markdown;
+        if (!input) {
+          throw new Error("'markdown' parameter is required");
+        }
+        
+        // If markdown is a stringified JSON, parse it
+        if (typeof input === "string" && input.trim().startsWith("{")) {
+          try {
+            input = JSON.parse(input);
+          } catch {
+            // Not JSON, use as-is
+          }
+        }
         
         const result = await processor.queryExtended(
           input,
@@ -339,8 +353,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
       }
 
       case "mdast-transform": {
-        // Determine input (backward compatible)
-        const input = args.input || args.markdown;
+        // Determine input: markdown can be string or object (InputSpec)
+        let input = args.markdown;
+        if (!input) {
+          throw new Error("'markdown' parameter is required");
+        }
+        
+        // If markdown is a stringified JSON, parse it
+        if (typeof input === "string" && input.trim().startsWith("{")) {
+          try {
+            input = JSON.parse(input);
+          } catch {
+            // Not JSON, use as-is
+          }
+        }
         
         const result = await processor.transformExtended(
           input,
@@ -399,8 +425,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
       }
 
       case "mdast-analyze": {
-        // Determine input (backward compatible)
-        const input = args.input || args.markdown;
+        // Determine input: markdown can be string or object (InputSpec)
+        let input = args.markdown;
+        if (!input) {
+          throw new Error("'markdown' parameter is required");
+        }
+        
+        // If markdown is a stringified JSON, parse it
+        if (typeof input === "string" && input.trim().startsWith("{")) {
+          try {
+            input = JSON.parse(input);
+          } catch {
+            // Not JSON, use as-is
+          }
+        }
         
         const result = await processor.analyzeExtended(
           input,
