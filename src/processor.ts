@@ -31,6 +31,7 @@ export interface TransformConfig {
   wrapper?: string;
   newType?: string;
   targetSelector?: string;
+  depth?: number; // For heading depth changes in rename operation
 }
 
 export interface TransformResult {
@@ -633,7 +634,7 @@ export class MDProcessor {
       case "unwrap":
         return this.unwrapNodes(tree, nodes);
       case "rename":
-        return this.renameNodes(tree, nodes, transform.newType);
+        return this.renameNodes(tree, nodes, transform.newType, transform.depth);
       case "clone":
         return this.cloneNodes(tree, nodes, transform.targetSelector);
       default:
@@ -675,7 +676,12 @@ export class MDProcessor {
   /**
    * ノードをリネーム
    */
-  private renameNodes(tree: Root, nodes: Content[], newType?: string): { success: boolean; tree?: Root } {
+  private renameNodes(
+    tree: Root,
+    nodes: Content[],
+    newType?: string,
+    depth?: number
+  ): { success: boolean; tree?: Root } {
     if (!newType) {
       return { success: false };
     }
@@ -683,6 +689,10 @@ export class MDProcessor {
     visit(tree, (node: any): void => {
       if (nodes.includes(node)) {
         node.type = newType;
+        // If depth is specified and node is a heading, update its depth
+        if (depth !== undefined && node.type === "heading") {
+          node.depth = depth;
+        }
       }
     });
 

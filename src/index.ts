@@ -183,6 +183,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                     type: "string",
                     description: "rename時の新しいノードタイプ",
                   },
+                  depth: {
+                    type: "number",
+                    description: "rename時のheading depth (1-6)",
+                  },
                   targetSelector: {
                     type: "string",
                     description: "clone時の挿入先セレクタ",
