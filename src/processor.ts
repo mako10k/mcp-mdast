@@ -5,6 +5,9 @@ import { visit } from "unist-util-visit";
 import { select, selectAll } from "unist-util-select";
 import { u } from "unist-builder";
 import type { Root, Content, Heading, Paragraph, Link, Image } from "mdast";
+import { ResourceManager } from "./resource-manager.js";
+import { InputResolver, InputSpec } from "./input-resolver.js";
+import { OutputHandler, OutputSpec, OutputResult } from "./output-handler.js";
 
 export type Operation = "select" | "insert" | "update" | "remove" | "replace";
 export type Position = "before" | "after" | "prepend" | "append" | "replace";
@@ -54,6 +57,23 @@ export interface AnalysisResult {
 export class MDProcessor {
   private parser = unified().use(remarkParse);
   private stringifier = unified().use(remarkStringify);
+  private resourceManager: ResourceManager;
+  private inputResolver: InputResolver;
+  private outputHandler: OutputHandler;
+
+  constructor() {
+    this.resourceManager = new ResourceManager();
+    this.inputResolver = new InputResolver(this.resourceManager);
+    this.outputHandler = new OutputHandler(this.resourceManager);
+  }
+
+  /**
+   * Initialize resource manager
+   */
+  async initialize(): Promise<void> {
+    await this.resourceManager.initialize();
+    await this.resourceManager.cleanup();
+  }
 
   /**
    * Markdownを解析してMDASTに変換
