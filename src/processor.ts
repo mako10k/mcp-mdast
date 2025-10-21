@@ -103,6 +103,216 @@ export class MDProcessor {
   }
 
   /**
+   * Query with extended I/O support
+   */
+  async queryExtended(
+    input: InputSpec | string,
+    operation: Operation,
+    selector?: string,
+    content?: string,
+    position?: Position,
+    index?: number,
+    output?: OutputSpec
+  ): Promise<OutputResult | QueryResult> {
+    try {
+      // Resolve input
+      let markdown: string;
+      let sourceMeta: any = {};
+
+      if (typeof input === "string") {
+        markdown = input;
+        sourceMeta = { source: { type: "text" } };
+      } else if (input.source === "mdast") {
+        // Special handling for MDAST resources
+        const resource = await this.inputResolver.getResourceMetadata(input);
+        if (resource) {
+          // For select operations, work directly on MDAST
+          if (operation === "select") {
+            const result = this.selectNodesFromTree(resource.mdast, selector, index);
+            return result;
+          }
+
+          // For other operations, convert to markdown
+          markdown = this.stringify(resource.mdast);
+          sourceMeta = {
+            source: { type: "mdast", value: input.uri },
+            operations: resource.metadata.operations || [],
+          };
+        } else {
+          throw new Error(`Resource not found: ${input.uri}`);
+        }
+      } else {
+        markdown = await this.inputResolver.resolve(input);
+        const sourceType = input.source;
+        const sourceValue = input.path || input.url || input.value;
+        sourceMeta = { source: { type: sourceType, value: sourceValue } };
+      }
+
+      // Execute operation
+      const result = await this.query(markdown, operation, selector, content, position, index);
+
+      if (!result.success) {
+        return result;
+      }
+
+      // For select operation, return as-is (no output spec applies)
+      if (operation === "select") {
+        return result;
+      }
+
+      // Handle output
+      const tree = this.parse(result.result!);
+      const metadata = {
+        ...sourceMeta,
+        operations: [
+          ...(sourceMeta.operations || []),
+          {
+            timestamp: new Date().toISOString(),
+            tool: "mdast-query",
+            operation,
+          },
+        ],
+      };
+
+      return this.outputHandler.handle(result.result!, tree, output, metadata);
+    } catch (error) {
+      return {
+        type: "text",
+        content: JSON.stringify({
+          success: false,
+          error: error instanceof Error ? error.message : String(error),
+        }),
+      };
+    }
+  }
+
+  private selectNodesFromTree(tree: Root, selector?: string, index?: number): QueryResult {
+    if (!selector) {
+      return { success: false, error: "Selector is required for select operation" };
+    }
+
+    try {
+      const nodes = selectAll(selector, tree) as Content[];
+      const targetNodes = index !== undefined ? [nodes[index]] : nodes;
+
+      const selected = targetNodes
+        .filter((node) => node !== undefined)
+        .map((node: any) => ({
+          type: node.type,
+          position: node.position
+            ? { line: node.position.start.line, column: node.position.start.column }
+            : null,
+          content: this.extractText(node),
+          metadata: this.getNodeMetadata(node),
+        }));
+
+      return { success: true, selected };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+
+  /**
+   * Transform with extended I/O support
+   */
+  async transformExtended(
+    input: InputSpec | string,
+    transforms: TransformConfig[],
+    output?: OutputSpec
+  ): Promise<OutputResult | TransformResult> {
+    try {
+      // Resolve input
+      let markdown: string;
+      let sourceMeta: any = {};
+
+      if (typeof input === "string") {
+        markdown = input;
+        sourceMeta = { source: { type: "text" } };
+      } else {
+        markdown = await this.inputResolver.resolve(input);
+        const sourceType = input.source;
+        const sourceValue = input.path || input.url || input.uri;
+        sourceMeta = { source: { type: sourceType, value: sourceValue } };
+
+        // Get resource metadata if mdast source
+        if (input.source === "mdast") {
+          const resource = await this.inputResolver.getResourceMetadata(input);
+          if (resource) {
+            sourceMeta.operations = resource.metadata.operations || [];
+          }
+        }
+      }
+
+      // Execute transforms
+      const result = await this.transform(markdown, transforms);
+
+      if (!result.success) {
+        return result;
+      }
+
+      // Handle output
+      const tree = this.parse(result.result!);
+      const metadata = {
+        ...sourceMeta,
+        operations: [
+          ...(sourceMeta.operations || []),
+          {
+            timestamp: new Date().toISOString(),
+            tool: "mdast-transform",
+            operation: "transform",
+          },
+        ],
+      };
+
+      return this.outputHandler.handle(result.result!, tree, output, metadata);
+    } catch (error) {
+      return {
+        type: "text",
+        content: JSON.stringify({
+          success: false,
+          error: error instanceof Error ? error.message : String(error),
+        }),
+      };
+    }
+  }
+
+  /**
+   * Analyze with extended I/O support (read-only, no output variants)
+   */
+  async analyzeExtended(
+    input: InputSpec | string,
+    analysis: string[]
+  ): Promise<AnalysisResult> {
+    try {
+      // Resolve input
+      let markdown: string;
+
+      if (typeof input === "string") {
+        markdown = input;
+      } else {
+        markdown = await this.inputResolver.resolve(input);
+      }
+
+      // Execute analysis
+      return this.analyze(markdown, analysis);
+    } catch (error) {
+      return {
+        error: error instanceof Error ? error.message : String(error),
+      } as any;
+    }
+  }
+
+  /**
+   * Get resource manager (for MCP resource API)
+   */
+  getResourceManager(): ResourceManager {
+    return this.resourceManager;
+  }
+
+  /**
    * 統合クエリ操作
    */
   async query(
