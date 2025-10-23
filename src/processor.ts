@@ -107,7 +107,7 @@ export class MDProcessor {
    * Query with extended I/O support
    */
   async queryExtended(
-    input: InputSpec | string,
+    input: InputSpec,
     operation: Operation,
     selector?: string,
     content?: string,
@@ -120,10 +120,7 @@ export class MDProcessor {
       let markdown: string;
       let sourceMeta: any = {};
 
-      if (typeof input === "string") {
-        markdown = input;
-        sourceMeta = { source: { type: "text" } };
-      } else if (input.source === "mdast") {
+      if (input.source === "mdast") {
         // Special handling for MDAST resources
         const resource = await this.inputResolver.getResourceMetadata(input);
         if (resource) {
@@ -243,7 +240,7 @@ export class MDProcessor {
    * Transform with extended I/O support
    */
   async transformExtended(
-    input: InputSpec | string,
+    input: InputSpec,
     transforms: TransformConfig[],
     output?: OutputSpec
   ): Promise<OutputResult | TransformResult> {
@@ -252,10 +249,7 @@ export class MDProcessor {
       let markdown: string;
       let sourceMeta: any = {};
 
-      if (typeof input === "string") {
-        markdown = input;
-        sourceMeta = { source: { type: "text" } };
-      } else if (input.source === "mdast") {
+      if (input.source === "mdast") {
         // Special handling for MDAST resources
         const resource = await this.inputResolver.getResourceMetadata(input);
         if (resource) {
@@ -312,18 +306,12 @@ export class MDProcessor {
    * Analyze with extended I/O support (read-only, no output variants)
    */
   async analyzeExtended(
-    input: InputSpec | string,
+    input: InputSpec,
     analysis: string[]
   ): Promise<AnalysisResult> {
     try {
       // Resolve input
-      let markdown: string;
-
-      if (typeof input === "string") {
-        markdown = input;
-      } else {
-        markdown = await this.inputResolver.resolve(input);
-      }
+      const markdown = await this.inputResolver.resolve(input);
 
       // Execute analysis
       return this.analyze(markdown, analysis);

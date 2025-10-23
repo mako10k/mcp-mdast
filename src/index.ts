@@ -36,82 +36,77 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "mdast-query",
         description:
-          "MarkdownをMDASTに解析し、CSS風セレクタでクエリ・操作を行う統合ツール。select/insert/update/remove/replace操作をサポート。入力: text/file/url/mdast、出力: text/file/mdast",
+          "Parse Markdown to MDAST and perform query/manipulation operations with CSS-style selectors. Supports select/insert/update/remove/replace operations. Input: text/file/url/mdast, Output: text/file/mdast",
         inputSchema: {
           type: "object",
           properties: {
             markdown: {
-              oneOf: [
-                { type: "string", description: "Markdownテキスト（後方互換性）" },
-                {
-                  type: "object",
-                  description: "柔軟な入力指定",
-                  properties: {
-                    source: {
-                      type: "string",
-                      enum: ["text", "file", "url", "mdast"],
-                      description: "入力ソースタイプ",
-                    },
-                    value: {
-                      type: "string",
-                      description: "text: Markdown文字列",
-                    },
-                    path: {
-                      type: "string",
-                      description: "file: ファイルパス（ホームディレクトリ内）",
-                    },
-                    url: {
-                      type: "string",
-                      description: "url: HTTP(S) URL",
-                    },
-                    uri: {
-                      type: "string",
-                      description: "mdast: リソースURI (mdast://...)",
-                    },
-                  },
-                  required: ["source"],
+              type: "object",
+              description: "Input specification",
+              properties: {
+                source: {
+                  type: "string",
+                  enum: ["text", "file", "url", "mdast"],
+                  description: "Input source type",
                 },
-              ],
+                value: {
+                  type: "string",
+                  description: "text: Markdown string",
+                },
+                path: {
+                  type: "string",
+                  description: "file: File path (within home directory)",
+                },
+                url: {
+                  type: "string",
+                  description: "url: HTTP(S) URL",
+                },
+                uri: {
+                  type: "string",
+                  description: "mdast: Resource URI (mdast://...)",
+                },
+              },
+              required: ["source"],
             },
             operation: {
               type: "string",
               enum: ["select", "insert", "update", "remove", "replace"],
-              description: "実行する操作タイプ",
+              description: "Operation type to perform",
             },
             selector: {
               type: "string",
               description:
-                "CSS風セレクタ (例: 'heading[depth=\"1\"]', 'paragraph > strong')",
+                "CSS-style selector (e.g., 'heading[depth=\"1\"]', 'paragraph > strong')",
             },
             content: {
               type: "string",
-              description: "挿入/更新するコンテンツ (Markdown形式)",
+              description: "Content to insert/update (Markdown format)",
             },
             position: {
               type: "string",
               enum: ["before", "after", "prepend", "append", "replace"],
-              description: "挿入位置の指定",
+              description: "Position specification for insertion",
             },
             index: {
               type: "number",
-              description: "複数マッチ時のインデックス指定 (0始まり)",
+              description: "Index specification for multiple matches (0-based)",
             },
             output: {
               type: "object",
-              description: "出力先指定",
+              description: "Output destination specification",
               properties: {
                 type: {
                   type: "string",
                   enum: ["text", "file", "mdast"],
-                  description: "出力タイプ",
+                  description: "Output type",
                 },
                 path: {
                   type: "string",
-                  description: "file: 保存先パス（ホームディレクトリ内）",
+                  description: "file: Save path (within home directory)",
                 },
                 ttl: {
                   type: "number",
-                  description: "mdast: 有効期限（秒、デフォルト86400=1日）",
+                  description: "mdast: TTL in seconds (default 86400=1 day)",
                 },
               },
               required: ["type"],
@@ -123,73 +118,68 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "mdast-transform",
         description:
-          "カスタム変換ロジックを適用。wrap/unwrap/rename/clone操作をサポート。入力: text/file/url/mdast、出力: text/file/mdast",
+          "Apply custom transformation logic. Supports wrap/unwrap/rename/clone operations. Input: text/file/url/mdast, Output: text/file/mdast",
         inputSchema: {
           type: "object",
           properties: {
             markdown: {
-              oneOf: [
-                { type: "string", description: "Markdownテキスト（後方互換性）" },
-                {
-                  type: "object",
-                  description: "柔軟な入力指定",
-                  properties: {
-                    source: {
-                      type: "string",
-                      enum: ["text", "file", "url", "mdast"],
-                      description: "入力ソースタイプ",
-                    },
-                    value: {
-                      type: "string",
-                      description: "text: Markdown文字列",
-                    },
-                    path: {
-                      type: "string",
-                      description: "file: ファイルパス",
-                    },
-                    url: {
-                      type: "string",
-                      description: "url: HTTP(S) URL",
-                    },
-                    uri: {
-                      type: "string",
-                      description: "mdast: リソースURI",
-                    },
-                  },
-                  required: ["source"],
+              type: "object",
+              description: "Input specification",
+              properties: {
+                source: {
+                  type: "string",
+                  enum: ["text", "file", "url", "mdast"],
+                  description: "Input source type",
                 },
-              ],
+                value: {
+                  type: "string",
+                  description: "text: Markdown string",
+                },
+                path: {
+                  type: "string",
+                  description: "file: File path",
+                },
+                url: {
+                  type: "string",
+                  description: "url: HTTP(S) URL",
+                },
+                uri: {
+                  type: "string",
+                  description: "mdast: Resource URI",
+                },
+              },
+              required: ["source"],
             },
             transforms: {
               type: "array",
-              description: "適用する変換のリスト",
+              description: "List of transformations to apply",
               items: {
                 type: "object",
                 properties: {
                   type: {
                     type: "string",
                     enum: ["wrap", "unwrap", "rename", "clone"],
-                    description: "変換タイプ",
+                    description: "Transformation type",
                   },
                   selector: {
                     type: "string",
-                    description: "対象ノードのCSS風セレクタ",
+                    description: "CSS-style selector for target nodes",
                   },
                   wrapper: {
                     type: "string",
-                    description: "wrap時のラッパータイプ (例: 'blockquote')",
+                    description: "Wrapper type for wrap operation (e.g., 'blockquote')",
                   },
                   newType: {
                     type: "string",
-                    description: "rename時の新しいノードタイプ",
+                    description: "New node type for rename operation",
                   },
                   depth: {
                     type: "number",
-                    description: "rename時のheading depth (1-6)",
+                    description: "Heading depth for rename operation (1-6)",
                   },
                   targetSelector: {
                     type: "string",
-                    description: "clone時の挿入先セレクタ",
+                    description: "Target selector for clone insertion",
                   },
                 },
                 required: ["type", "selector"],
@@ -197,12 +187,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             output: {
               type: "object",
-              description: "出力先指定",
+              description: "Output destination specification",
               properties: {
                 type: {
                   type: "string",
                   enum: ["text", "file", "mdast"],
-                  description: "出力タイプ",
+                  description: "Output type",
                 },
                 path: {
                   type: "string",
@@ -222,46 +212,41 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "mdast-analyze",
         description:
-          "ドキュメント構造の分析と統計情報の取得。structure/stats/links/headings/toc分析をサポート。入力: text/file/url/mdast",
+          "Analyze document structure and retrieve statistics. Supports structure/stats/links/headings/toc analysis. Input: text/file/url/mdast",
         inputSchema: {
           type: "object",
           properties: {
             markdown: {
-              oneOf: [
-                { type: "string", description: "Markdownテキスト（後方互換性）" },
-                {
-                  type: "object",
-                  description: "柔軟な入力指定",
-                  properties: {
-                    source: {
-                      type: "string",
-                      enum: ["text", "file", "url", "mdast"],
-                      description: "入力ソースタイプ",
-                    },
-                    value: {
-                      type: "string",
-                      description: "text: Markdown文字列",
-                    },
-                    path: {
-                      type: "string",
-                      description: "file: ファイルパス",
-                    },
-                    url: {
-                      type: "string",
-                      description: "url: HTTP(S) URL",
-                    },
-                    uri: {
-                      type: "string",
-                      description: "mdast: リソースURI",
-                    },
-                  },
-                  required: ["source"],
+              type: "object",
+              description: "Input specification",
+              properties: {
+                source: {
+                  type: "string",
+                  enum: ["text", "file", "url", "mdast"],
+                  description: "Input source type",
                 },
-              ],
+                value: {
+                  type: "string",
+                  description: "text: Markdown string",
+                },
+                path: {
+                  type: "string",
+                  description: "file: File path",
+                },
+                url: {
+                  type: "string",
+                  description: "url: HTTP(S) URL",
+                },
+                uri: {
+                  type: "string",
+                  description: "mdast: Resource URI",
+                },
+              },
+              required: ["source"],
             },
             analysis: {
               type: "array",
-              description: "実行する分析タイプのリスト",
+              description: "List of analysis types to perform",
               items: {
                 type: "string",
                 enum: ["structure", "stats", "links", "headings", "toc"],
@@ -281,7 +266,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
 
     switch (name) {
       case "mdast-query": {
-        // Determine input: markdown can be string or object (InputSpec)
+        // Get input from args
         let input = args.markdown;
         if (!input) {
           throw new Error("'markdown' parameter is required");

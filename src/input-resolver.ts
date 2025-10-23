@@ -24,13 +24,7 @@ export class InputResolver {
   /**
    * Resolve input to Markdown text
    */
-  async resolve(input: InputSpec | string): Promise<string> {
-    // Backward compatibility: if input is a string, treat as text
-    if (typeof input === "string") {
-      return input;
-    }
-
-    // Handle InputSpec object
+  async resolve(input: InputSpec): Promise<string> {
     switch (input.source) {
       case "text":
         return this.resolveText(input.value);
