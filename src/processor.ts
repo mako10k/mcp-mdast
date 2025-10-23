@@ -156,10 +156,28 @@ export class MDProcessor {
         return result;
       }
 
-      // Handle output (including for select operation if output is specified)
+      // Handle output
       if (output) {
-        // For select, save the original tree, not the selected nodes
-        const tree = this.parse(markdown);
+        // For select operation, save the original tree
+        if (operation === "select") {
+          const tree = this.parse(markdown);
+          const metadata = {
+            ...sourceMeta,
+            operations: [
+              ...(sourceMeta.operations || []),
+              {
+                timestamp: new Date().toISOString(),
+                tool: "mdast-query",
+                operation,
+                selector,
+              },
+            ],
+          };
+          return this.outputHandler.handle(markdown, tree, output, metadata);
+        }
+
+        // For other operations, use the modified result
+        const tree = this.parse(result.result!);
         const metadata = {
           ...sourceMeta,
           operations: [
@@ -168,11 +186,10 @@ export class MDProcessor {
               timestamp: new Date().toISOString(),
               tool: "mdast-query",
               operation,
-              selector,
             },
           ],
         };
-        return this.outputHandler.handle(markdown, tree, output, metadata);
+        return this.outputHandler.handle(result.result!, tree, output, metadata);
       }
       
       // For select operation without output spec, return as-is
@@ -180,21 +197,8 @@ export class MDProcessor {
         return result;
       }
 
-      // Handle output for non-select operations
-      const tree = this.parse(result.result!);
-      const metadata = {
-        ...sourceMeta,
-        operations: [
-          ...(sourceMeta.operations || []),
-          {
-            timestamp: new Date().toISOString(),
-            tool: "mdast-query",
-            operation,
-          },
-        ],
-      };
-
-      return this.outputHandler.handle(result.result!, tree, output, metadata);
+      // No output specified for non-select operations, return the result
+      return result;
     } catch (error) {
       return {
         type: "text",
@@ -458,16 +462,9 @@ export class MDProcessor {
 
     let inserted = false;
     visit(tree, (node: any, idx: any, parent: any): any => {
-      if (!inserted && node === targetNode && parent && idx !== null && idx !== undefined) {
-        if (position === "before") {
-          parent.children.splice(idx, 0, ...newNodes);
-          inserted = true;
-          return "skip";
-        } else if (position === "after") {
-          parent.children.splice(idx + 1, 0, ...newNodes);
-          inserted = true;
-          return "skip";
-        } else if (position === "prepend" && "children" in node) {
+      if (!inserted && node === targetNode) {
+        // append/prepend operations don't require parent (they modify node.children directly)
+        if (position === "prepend" && "children" in node) {
           node.children.unshift(...newNodes);
           inserted = true;
           return "skip";
@@ -475,6 +472,18 @@ export class MDProcessor {
           node.children.push(...newNodes);
           inserted = true;
           return "skip";
+        }
+        // before/after operations require parent (they modify parent.children)
+        else if (parent && idx !== null && idx !== undefined) {
+          if (position === "before") {
+            parent.children.splice(idx, 0, ...newNodes);
+            inserted = true;
+            return "skip";
+          } else if (position === "after") {
+            parent.children.splice(idx + 1, 0, ...newNodes);
+            inserted = true;
+            return "skip";
+          }
         }
       }
     });

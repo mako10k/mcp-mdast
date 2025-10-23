@@ -1,7 +1,7 @@
 {
   "name": "mcp-mdast",
-  "version": "0.1.0",
-  "description": "MCP Server for MDAST manipulation with CSS-like selectors",
+  "version": "0.1.1",
+  "description": "MCP server for MDAST (Markdown Abstract Syntax Tree) manipulation with CSS-style selectors",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
